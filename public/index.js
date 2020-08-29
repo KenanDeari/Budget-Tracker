@@ -4,7 +4,7 @@ let myChart;
 fetch("/api/transaction")
   .then(response => response.json())
   .then(data => {
-    // save db data on global variable
+    // save db data to global variable
     transactions = data;
     populateTotal();
     populateTable();
@@ -12,6 +12,7 @@ fetch("/api/transaction")
   });
 
 function populateTotal() {
+  // reduce transaction amounts to a single total value
   const total = transactions.reduce((total, t) => {
     return total + parseInt(t.value);
   }, 0);
@@ -19,7 +20,6 @@ function populateTotal() {
   const totalEl = document.querySelector("#total");
   totalEl.textContent = total;
 }
-
 function populateTable() {
   const tbody = document.querySelector("#tbody");
   tbody.innerHTML = "";
@@ -29,19 +29,17 @@ function populateTable() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${transaction.name}</td>
-      <td>${transaction.value}</td>
-    `;
-
+      <td>${transaction.value}</td> `;
     tbody.appendChild(tr);
   });
 }
 
 function populateChart() {
-  // copy array & reverse it
+  // copy array to reverse it
   const reversed = transactions.slice().reverse();
   let sum = 0;
 
-  // creating date labels for chart
+  // creating labels for chart
   const labels = reversed.map(t => {
     const date = new Date(t.date);
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -53,7 +51,7 @@ function populateChart() {
     return sum;
   });
 
-  // remove old chart if present
+  // remove old chart if it exists
   if (myChart) {
     myChart.destroy();
   }
@@ -101,7 +99,7 @@ function sendTransaction(isAdding) {
     transaction.value *= -1;
   }
 
-  // add to the beginning of current array of data
+  // add to beginning of current array of data
   transactions.unshift(transaction);
 
   // re-run logic to populate ui with new record
@@ -109,7 +107,7 @@ function sendTransaction(isAdding) {
   populateTable();
   populateTotal();
 
-  // send to server
+  // also send to server
   fetch("/api/transaction", {
     method: "POST",
     body: JSON.stringify(transaction),
